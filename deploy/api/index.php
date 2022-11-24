@@ -41,7 +41,7 @@ $app->get('/api/products', function (Request $request, Response $response) {
 });
 
 function getProductsJSON() {
-    return file_get_contents(__DIR__ . '\mock\catalogueMock.json');
+    return file_get_contents(__DIR__ . '/mock/catalogueMock.json');
 }
 
 $app->get('/api/product/{id}', function (Request $request, Response $response, $args) {
