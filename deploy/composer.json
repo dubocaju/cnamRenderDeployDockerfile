@@ -13,7 +13,9 @@
         "symfony/yaml": "2.*",
         "symfony/cache": "^5.3",
         "ext-json": "*",
-        "tuupola/cors-middleware": "^1.4"
+        "tuupola/cors-middleware": "^1.4",
+        "symfony/serializer": "^2.8",
+        "symfony/property-access": "^2.8"
     },
     "autoload": {
         "psr-0": {
