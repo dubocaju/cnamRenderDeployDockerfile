@@ -6,6 +6,7 @@ use Firebase\JWT\JWT;
 
 require "client.php";
 require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap.php';
  
 const JWT_SECRET = "makey1234567";
 
