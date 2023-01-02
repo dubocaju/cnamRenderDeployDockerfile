@@ -26,11 +26,11 @@ $app->post('/api/login', function (Request $request, Response $response) {
     $client = $clientRepository->findOneBy(array('login' => $body['login']));
 
     if (!$client) {
-        $response->getBody()->write('{"error":"Aucun utilisateur ne correspond à ce login."}');
+        $response->getBody()->write('{"message":"Aucun utilisateur ne correspond à ce login."}');
         return $response->withStatus(400);
     }
     if (!password_verify($body['password'], $client->getPassword())) {
-        $response->getBody()->write('{"error":"Le mot de passe est incorrect"}');
+        $response->getBody()->write('{"message":"Le mot de passe est incorrect"}');
         return $response->withStatus(400);
     }
 
@@ -116,7 +116,7 @@ $options = [
     "ignore" => ["/api/login", "/api/register"],
     "error" => function ($response) {
         $response = $response->withStatus(401);
-        return $response->withHeader("Content-Type", "application/json")->getBody()->write('{"error":"Le token JWT est invalide"}');
+        return $response->withHeader("Content-Type", "application/json")->getBody()->write('{"message":"Le token JWT est invalide"}');
     }
 ];
 
