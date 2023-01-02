@@ -20,11 +20,21 @@ $serializer = new Serializer($normalizers, $encoders);
 $app = AppFactory::create();
 
 $app->post('/api/login', function (Request $request, Response $response) {
+    global $entityManager;
     $body = (array)$request->getParsedBody();
-    $login = $body['login'];
-    $password = $body['password'];
+    $clientRepository = $entityManager->getRepository('Client');
+    $client = $clientRepository->findOneBy(array('login' => $body['login']));
 
-    $jwt = createJWT($login, $password);
+    if (!$client) {
+        $response->getBody()->write('{"error":"Aucun utilisateur ne correspond à ce login."}');
+        return $response->withStatus(400);
+    }
+    if (!password_verify($body['password'], $client->getPassword())) {
+        $response->getBody()->write('{"error":"Le mot de passe est incorrect"}');
+        return $response->withStatus(400);
+    }
+
+    $jwt = createJWT($body['login'], $body['password']);
     return $response->withHeader("Authorization", "Bearer $jwt");
 });
 
@@ -63,14 +73,16 @@ $app->get('/api/product/{id}', function (Request $request, Response $response, $
     return $response;
 });
 
-$app->post('/api/register', function (Request $request, Response $response) use ($serializer) {
+$app->post('/api/register', function (Request $request, Response $response) use ($encoders) {
     global $entityManager;
     $body = (array)$request->getParsedBody();
     $client = createClientFromBody($body);
     $entityManager->persist($client);
     $entityManager->flush();
 
-    $client->setPassword(null);
+    $normalizer = new ObjectNormalizer();
+    $normalizer->setIgnoredAttributes(['password']);
+    $serializer = new Serializer([$normalizer], $encoders);
     $json = $serializer->serialize($client, 'json');
     $response->getBody()->write($json);
     return $response;
@@ -103,9 +115,8 @@ $options = [
     "path" => ["/api"],
     "ignore" => ["/api/login", "/api/register"],
     "error" => function ($response) {
-        $data = array('ERREUR' => 'Connexion', 'ERREUR' => 'JWT Non valide');
         $response = $response->withStatus(401);
-        return $response->withHeader("Content-Type", "application/json")->getBody()->write(json_encode($data));
+        return $response->withHeader("Content-Type", "application/json")->getBody()->write('{"error":"Le token JWT est invalide"}');
     }
 ];
 
