@@ -55,7 +55,12 @@ function createJWT($login, $password) : string
 $app->get('/api/products', function (Request $request, Response $response) use ($serializer) {
     global $entityManager;
     $productRepository = $entityManager->getRepository('Product');
-    $products = $productRepository->findAll();
+    $params = $request->getQueryParams();
+    if (isset($params['name']) || isset($params['category'])) {
+        $products = $productRepository->findBy($params);
+    } else {
+        $products = $productRepository->findAll();
+    }
 
     $json = $serializer->serialize($products, 'json');
     $response->getBody()->write($json);
